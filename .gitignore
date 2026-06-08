@@ -1,4 +1,5 @@
 #for build
+*.cache*
 build/
 dist/
 #Database
@@ -12,6 +13,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+.python-version
 .Python
 build/
 develop-eggs/
