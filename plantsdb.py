@@ -1,6 +1,7 @@
 import sqlite3
 
 DB = "plants.db"
+DEFAULT_INPUT = {"temp_max": 40.0, "temp_min": 0.0, "water_amount": 100}
 
 
 def init_db():
@@ -8,12 +9,12 @@ def init_db():
         conn.execute("""
             CREATE TABLE IF NOT EXISTS plants_data(
                 id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL,
-                scientific_name TEXT,
-                temp_max REAL,
-                temp_min REAL,
+                name TEXT NOT NULL UNIQUE,
+                scientific_name TEXT DEFAULT "",
+                temp_max REAL DEFAULT 40.0,
+                temp_min REAL DEFAULT 0.0,
                 grow_pattern TEXT,
-                water_amount REAL,
+                water_amount REAL DEFAULT 100,
                 fertilizer TEXT,
                 plant TEXT,
                 harvest TEXT
@@ -24,8 +25,20 @@ def init_db():
 def save_plants(plants_dict):
     with sqlite3.connect(DB) as conn:
         columns = ", ".join(plants_dict.keys())
-        placeholders = ", ".join([f":{key}" for key in plants_dict.keys()])
-        query = f"INSERT INTO plants_data ({columns}) VALUES ({placeholders})"
+
+        placeholders = ", ".join(f":{k}" for k in plants_dict.keys())
+
+        updates = ", ".join(
+            f"{k}=excluded.{k}" for k in plants_dict.keys() if k != "name"
+        )
+
+        query = f"""
+        INSERT INTO plants_data ({columns})
+        VALUES ({placeholders})
+        ON CONFLICT(name)
+        DO UPDATE SET {updates}
+        """
+
         conn.execute(query, plants_dict)
 
 
@@ -42,18 +55,18 @@ def Input_plants_data():
     if check_input(temp_max):
         temp_max = float(temp_max)
     else:
-        temp_max = None
+        temp_max = DEFAULT_INPUT["temp_max"]
     temp_min = input("Temperture min (float): ")
     if check_input(temp_min):
         temp_min = float(temp_min)
     else:
-        temp_min = None
+        temp_min = DEFAULT_INPUT["temp_min"]
     grow_pattern = input("Growing pattern (text):")
     water_amount = input("Watering amount (float): ")
     if check_input(water_amount):
         water_amount = float(water_amount)
     else:
-        water_amount = None
+        water_amount = DEFAULT_INPUT["water_amount"]
     fertilizer = input("Fertilizer (text): ")
     plant = input("When Plants (text): ")
     harvest = input("When Harvest (text): ")
@@ -129,5 +142,18 @@ def search_data(keyword):
     print(result)
 
 
+def delete_data(item_name):
+    with sqlite3.connect(DB) as conn:
+        conn.execute(
+            """
+            DELETE FROM plants_data
+            WHERE name = ?
+            """,
+            (item_name,),
+        )
+    print("Deleted data successfully")
+
+
 if __name__ == "__main__":
-    show_data("tomato")
+    init_db()
+    show_data()
