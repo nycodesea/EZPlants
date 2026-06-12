@@ -59,6 +59,9 @@ def create_temp_range(rows):
     fig.update_layout(
         title="適温範囲",
         xaxis_title="Temperature (°C)",
+        height=max(200, len(names) * 50),
+        bargap=0.5,
+        margin=dict(l=60, r=40, t=60, b=10),
     )
 
     return fig
@@ -85,9 +88,12 @@ def create_gantt_chart(rows):
 
         fig.add_bar(
             y=[event],
-            x=[end - start + 1],
-            base=[start],
+            x=[end - start + 1.6],
+            base=[start - 0.3],
             orientation="h",
+            text=[event],
+            textposition="inside",
+            insidetextanchor="middle",
         )
 
     fig.update_xaxes(
@@ -99,8 +105,10 @@ def create_gantt_chart(rows):
 
     fig.update_layout(
         title=f"{name} 栽培カレンダー",
-        height=300,
+        height=max(200, len(event) * 50),
         showlegend=False,
+        margin=dict(l=40, r=40, t=30, b=40),
+        bargap=0.5,
     )
 
     return fig

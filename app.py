@@ -28,7 +28,12 @@ app.layout = html.Div(
         ),
         dcc.Graph(id="temp-graph"),
         dcc.Graph(id="gantt-graph"),
-    ]
+    ],
+    style={
+        "backgroundColor": "#FDF3DDFF",
+        "minHeight": "100vh",
+        "padding": "20px",
+    },
 )
 
 
