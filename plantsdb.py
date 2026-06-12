@@ -15,9 +15,11 @@ def init_db():
                 temp_min REAL DEFAULT 0.0,
                 grow_pattern TEXT,
                 water_amount REAL DEFAULT 100,
-                fertilizer TEXT,
-                plant TEXT,
-                harvest TEXT
+                fertilizer INEGER,
+                sow_start INTEGER,
+                sow_end INTEGER,
+                harvest_start INTEGER,
+                harvest_end INTEGER
             )
         """)
 
@@ -34,9 +36,11 @@ def init_fav_db():
                 temp_min REAL,
                 grow_pattern TEXT,
                 water_amount REAL,
-                fertilizer TEXT,
-                plant TEXT,
-                harvest TEXT
+                fertilizer INEGER,
+                sow_start INTEGER,
+                sow_end INTEGER,
+                harvest_start INTEGER,
+                harvest_end INTEGER
             )
         """)
 
@@ -86,10 +90,11 @@ def Input_plants_data():
         water_amount = float(water_amount)
     else:
         water_amount = DEFAULT_INPUT["water_amount"]
-    fertilizer = input("Fertilizer (text): ")
-    plant = input("When Plants (text): ")
-    harvest = input("When Harvest (text): ")
-
+    fertilizer = input("Fertilizer (int): ")
+    sow_start = input("Sowing start month(int): ")
+    sow_end = input("Sowing end month(int): ")
+    harvest_start = input("When Harvest start(int): ")
+    harvest_end = input("When Harvest end(int): ")
     plants_dict = {}
     plants_dict["name"] = name
     plants_dict["scientific_name"] = scientific_name
@@ -98,8 +103,10 @@ def Input_plants_data():
     plants_dict["grow_pattern"] = grow_pattern
     plants_dict["water_amount"] = water_amount
     plants_dict["fertilizer"] = fertilizer
-    plants_dict["plant"] = plant
-    plants_dict["harvest"] = harvest
+    plants_dict["sow_start"] = sow_start
+    plants_dict["sow_end"] = sow_end
+    plants_dict["harvest_start"] = harvest_start
+    plants_dict["harvest_end"] = harvest_end
     return plants_dict
 
 
@@ -212,7 +219,30 @@ def get_temp_rows(keyword=None, table="plants_data", database=DB):
         return rows
 
 
+def get_gantt_data(keyword, table="plants_data", database=DB):
+    with sqlite3.connect(database) as conn:
+        cursor = conn.cursor()
+
+        if keyword is None:
+            print("NEED input NAME")
+            return
+        else:
+            cursor.execute(
+                f"""
+                SELECT name, fertilizer, sow_start, sow_end, harvest_start, harvest_end
+                FROM {table}
+                WHERE name = ?
+                """,
+                (keyword,),
+            )
+
+        rows = cursor.fetchall()
+        print(rows)
+        return rows
+
+
 if __name__ == "__main__":
     init_db()
     show_data()
     get_temp_rows()
+    get_gantt_data("Tomato")

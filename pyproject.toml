@@ -8,6 +8,7 @@ dependencies = [
     "matplotlib>=3.10.9",
     "openmeteo-requests>=1.7.5",
     "pandas>=3.0.3",
+    "plotly>=6.8.0",
     "requests-cache>=1.3.2",
     "retry-requests>=2.0.0",
 ]

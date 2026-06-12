@@ -16,6 +16,9 @@ if user_input == "0":
     plantsdb.show_data(user_input, TABLE, DB)
     rows = plantsdb.get_temp_rows(user_input, TABLE, DB)
     graph.show_temp_range(rows)
+    if user_input:
+        gantt_rows = plantsdb.get_gantt_data(user_input, TABLE, DB)
+        graph.show_gantt_chart(gantt_rows)
 elif user_input == "1":
     plantsdb.save_plants(plantsdb.Input_plants_data(), TABLE, DB)
     print("Saved.")
