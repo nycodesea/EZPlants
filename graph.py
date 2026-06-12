@@ -30,10 +30,43 @@ def show_temp_range(rows):
     plt.show()
 
 
-def show_gantt_chart(rows):
+def create_temp_range(rows):
+
+    fig = go.Figure()
+
+    for temp in range(-20, 50):
+
+        ratio = (temp + 20) / 70
+
+        fig.add_vrect(
+            x0=temp,
+            x1=temp + 1,
+            fillcolor=f"rgba({int(255*ratio)},0,{int(255*(1-ratio))},0.15)",
+            line_width=0,
+            layer="below",
+        )
+
+    names = [r[0] for r in rows]
+    temp_min = [r[1] for r in rows]
+    temp_max = [r[2] for r in rows]
+
+    fig.add_bar(
+        y=names,
+        x=[mx - mn for mn, mx in zip(temp_min, temp_max)],
+        base=temp_min,
+        orientation="h",
+    )
+    fig.update_layout(
+        title="適温範囲",
+        xaxis_title="Temperature (°C)",
+    )
+
+    return fig
+
+
+def create_gantt_chart(rows):
     if not rows:
-        print("No gantt data found.")
-        return
+        return go.Figure()
 
     name, fertilizer, sow_start, sow_end, harvest_start, harvest_end = rows[0]
 
@@ -47,7 +80,7 @@ def show_gantt_chart(rows):
 
     for event, start, end in events:
 
-        if start is None:
+        if start is None or end is None:
             continue
 
         fig.add_bar(
@@ -70,4 +103,4 @@ def show_gantt_chart(rows):
         showlegend=False,
     )
 
-    fig.show(config={"responsive": True})
+    return fig

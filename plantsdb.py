@@ -13,13 +13,13 @@ def init_db():
                 scientific_name TEXT DEFAULT "",
                 temp_max REAL DEFAULT 40.0,
                 temp_min REAL DEFAULT 0.0,
-                grow_pattern TEXT,
+                grow_pattern TEXT DEFAULT None,
                 water_amount REAL DEFAULT 100,
-                fertilizer INEGER,
-                sow_start INTEGER,
-                sow_end INTEGER,
-                harvest_start INTEGER,
-                harvest_end INTEGER
+                fertilizer INEGER DEFAULT None,
+                sow_start INTEGER DEFAULT None,
+                sow_end INTEGER DEFAULT None,
+                harvest_start INTEGER DEFAULT None,
+                harvest_end INTEGER DEFAULT None
             )
         """)
 
@@ -110,47 +110,50 @@ def Input_plants_data():
     return plants_dict
 
 
-def show_data(keyword=None, table="plants_data", database=DB):
+def get_data(keyword=None, table="plants_data", database=DB):
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()
 
-        if keyword == None:
-            cursor.execute(f"""
-                SELECT * FROM {table} ORDER BY name
-            """)
-        else:
+        if keyword:
             cursor.execute(
                 f"""
-                SELECT * FROM {table} WHERE name like ?
-            """,
-                # part match
+                SELECT * FROM {table}
+                WHERE name LIKE ?
+                ORDER BY name
+                """,
                 (f"%{keyword}%",),
             )
-        columns = [description[0] for description in cursor.description]
+        else:
+            cursor.execute(f"""
+                SELECT * FROM {table}
+                ORDER BY name
+                """)
+
+        columns = [d[0] for d in cursor.description]
         rows = cursor.fetchall()
-        if not rows:
-            print("No data found.")
-            return
-        # max width for each column
-        col_widths = [
-            max(len(str(row[i])) for row in rows + [columns])
-            for i in range(len(columns))
-        ]
 
-        # header
-        header = " | ".join(
-            f"{col:<{width}}" for col, width in zip(columns, col_widths)
+        return rows, columns
+
+
+def show_data(rows, columns, table="plants_data", database=DB):
+    if not rows:
+        print("No data found.")
+        return
+    # max width for each column
+    col_widths = [
+        max(len(str(row[i])) for row in rows + [columns]) for i in range(len(columns))
+    ]
+
+    # header
+    header = " | ".join(f"{col:<{width}}" for col, width in zip(columns, col_widths))
+    print(header)
+    print("-" * len(header))
+
+    # data rows
+    for row in rows:
+        print(
+            " | ".join(f"{str(item):<{width}}" for item, width in zip(row, col_widths))
         )
-        print(header)
-        print("-" * len(header))
-
-        # data rows
-        for row in rows:
-            print(
-                " | ".join(
-                    f"{str(item):<{width}}" for item, width in zip(row, col_widths)
-                )
-            )
 
 
 def search_data(keyword, table="plants_data", database=DB):
@@ -231,9 +234,9 @@ def get_gantt_data(keyword, table="plants_data", database=DB):
                 f"""
                 SELECT name, fertilizer, sow_start, sow_end, harvest_start, harvest_end
                 FROM {table}
-                WHERE name = ?
+                WHERE name LIKE ?
                 """,
-                (keyword,),
+                (f"%{keyword}%",),
             )
 
         rows = cursor.fetchall()
@@ -243,6 +246,3 @@ def get_gantt_data(keyword, table="plants_data", database=DB):
 
 if __name__ == "__main__":
     init_db()
-    show_data()
-    get_temp_rows()
-    get_gantt_data("Tomato")
