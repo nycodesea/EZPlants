@@ -1,4 +1,4 @@
-from dash import Dash, html, dcc, dash_table, Input, Output
+from dash import Dash, html, dcc, dash_table, Input, Output, State
 import pandas as pd
 import plantsdb
 from graph import create_temp_range, create_gantt_chart
@@ -7,6 +7,20 @@ import graph
 
 TABLE = "plants_data"
 FAVTABLE = "plants_fav_data"
+# for input
+FIELDS = [
+    ("name", "植物名(※必須)", "text"),
+    ("scientific_name", "学名", "text"),
+    ("temp_max", "最高温度", "number"),
+    ("temp_min", "最低温度", "number"),
+    ("grow_pattern", "成長パターン", "text"),
+    ("water_amount", "水やり量", "text"),
+    ("fertilizer", "肥料", "text"),
+    ("sow_start", "種まき開始月", "number"),
+    ("sow_end", "種まき終了月", "number"),
+    ("harvest_start", "収穫開始月", "number"),
+    ("harvest_end", "収穫終了月", "number"),
+]
 
 plantsdb.init_db()
 plantsdb.init_fav_db()
@@ -36,6 +50,25 @@ app.layout = html.Div(
         ),
         dcc.Graph(id="temp-graph"),
         dcc.Graph(id="gantt-graph"),
+        html.H2("植物追加"),
+        html.Div(
+            [
+                html.Div(
+                    dcc.Input(
+                        id=f"{field}-input",
+                        placeholder=placeholder,
+                        type=input_type,
+                    ),
+                    style={"margin": "5px"},
+                )
+                for field, placeholder, input_type in FIELDS
+            ],
+        ),
+        html.Button(
+            "保存",
+            id="save-button",
+        ),
+        html.Div(id="save-message"),
     ],
     style={
         "backgroundColor": "#FDF3DDFF",
@@ -43,6 +76,25 @@ app.layout = html.Div(
         "padding": "20px",
     },
 )
+
+
+# Input data
+@app.callback(
+    Output("save-message", "children"),
+    Input("save-button", "n_clicks"),
+    *[State(f"{field}-input", "value") for field, _, _ in FIELDS],
+    prevent_initial_call=True,
+)
+def save_plant_callback(n_clicks, *values):
+
+    plants_dict = {field: value for (field, _, _), value in zip(FIELDS, values)}
+
+    if not plants_dict["name"]:
+        return "植物名は必須です"
+
+    plantsdb.save_plants(plants_dict)
+
+    return f'{plants_dict["name"]} を保存しました'
 
 
 # temp-graph
@@ -76,14 +128,16 @@ def update_gantt(keyword):
     Output("plants-table", "data"),
     Output("plants-table", "columns"),
     Input("search-box", "value"),
+    Input("save-message", "children"),
 )
-def update_table(keyword):
-
+def update_table(keyword, message):
+    print("update_table called", message)
     if keyword:
         rows, columns = plantsdb.get_data(keyword)
     else:
         rows, columns = plantsdb.get_data()
-
+    print(rows[-1])
+    print(len(rows))
     df = pd.DataFrame(rows, columns=columns)
 
     return (

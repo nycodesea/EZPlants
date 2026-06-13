@@ -22,7 +22,7 @@ def show_temp_range(rows):
         extent=[-20, 50, -1, len(name)],
         aspect="auto",
         cmap="coolwarm",
-        alpha=0.3,
+        alpha=0.8,
     )
     ax.barh(y=name, left=temp_min, width=width, color="green")
 
@@ -55,6 +55,7 @@ def create_temp_range(rows):
         x=[mx - mn for mn, mx in zip(temp_min, temp_max)],
         base=temp_min,
         orientation="h",
+        opacity=0.9,
     )
     fig.update_layout(
         title="適温範囲",
