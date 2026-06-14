@@ -29,35 +29,7 @@ app = Dash(__name__)
 app.layout = html.Div(
     [
         html.H1("EZPlants"),
-        dcc.Input(
-            id="search-box",
-            placeholder="植物名を入力",
-            value="",
-        ),
-        html.Br(),
-        html.Br(),
-        html.Div(
-            [
-                dash_table.DataTable(
-                    id="plants-table",
-                    hidden_columns=["id"],
-                    page_size=20,
-                    row_selectable="single",
-                ),
-            ],
-            style={
-                "overflowX": "auto",
-                "maxWidth": "100%",
-            },
-        ),
-        html.Button(
-            "削除",
-            id="delete-button",
-        ),
-        html.Div(id="delete-message"),
-        dcc.Graph(id="temp-graph"),
-        dcc.Graph(id="gantt-graph"),
-        html.H2("植物追加"),
+        html.H2("植物追加(同一名は更新)"),
         html.Div(
             [
                 html.Div(
@@ -76,6 +48,33 @@ app.layout = html.Div(
             id="save-button",
         ),
         html.Div(id="save-message"),
+        html.Br(),
+        html.Br(),
+        dcc.Input(
+            id="search-box",
+            placeholder="植物名を入力",
+            value="",
+        ),
+        html.Div(
+            [
+                dash_table.DataTable(
+                    id="plants-table",
+                    page_size=20,
+                    row_selectable="single",
+                ),
+            ],
+            style={
+                "overflowX": "auto",
+                "maxWidth": "100%",
+            },
+        ),
+        html.Button(
+            "削除",
+            id="delete-button",
+        ),
+        html.Div(id="delete-message"),
+        dcc.Graph(id="temp-graph"),
+        dcc.Graph(id="gantt-graph"),
     ],
     style={
         "backgroundColor": "#FDF3DDFF",
@@ -133,9 +132,25 @@ def delete_plant(n_clicks, selected_rows, data):
 def save_plant_callback(n_clicks, *values):
 
     plants_dict = {field: value for (field, _, _), value in zip(FIELDS, values)}
-
+    plants_dict = {k: (None if v == "" else v) for k, v in plants_dict.items()}
+    # Input check
     if not plants_dict["name"]:
         return "植物名は必須です"
+    if plants_dict["temp_min"] and plants_dict["temp_max"]:
+        if plants_dict["temp_min"] > plants_dict["temp_max"]:
+            return "最低温度は最高温度以下にしてください"
+
+    month_fields = [
+        "sow_start",
+        "sow_end",
+        "harvest_start",
+        "harvest_end",
+    ]
+
+    for field in month_fields:
+        value = plants_dict[field]
+        if value is not None and not (1 <= value <= 12):
+            return f"{month_names[field]} は1～12で入力してください"
 
     plantsdb.save_plants(plants_dict)
 
@@ -186,6 +201,9 @@ def update_table(keyword, save_message, delete_message):
     print(rows[-1])
     print(len(rows))
     df = pd.DataFrame(rows, columns=columns)
+
+    if "id" in df.columns:
+        df = df.drop(columns=["id"])
 
     return (
         df.to_dict("records"),
