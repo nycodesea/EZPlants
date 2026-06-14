@@ -43,18 +43,19 @@ app.layout = html.Div(
                 for field, placeholder, input_type in FIELDS
             ],
         ),
-        html.Button(
-            "保存",
-            id="save-button",
+        html.Div(
+            html.Button(
+                "保存",
+                id="save-button",
+            ),
+            style={
+                "display":"flex",
+                "justifyContent":"center",
+            },
         ),
         html.Div(id="save-message"),
         html.Br(),
         html.Br(),
-        dcc.Input(
-            id="search-box",
-            placeholder="植物名を入力",
-            value="",
-        ),
         html.Div(
             [
                 dash_table.DataTable(
@@ -68,9 +69,22 @@ app.layout = html.Div(
                 "maxWidth": "100%",
             },
         ),
-        html.Button(
-            "削除",
-            id="delete-button",
+        html.Div(
+            html.Button(
+                "削除",
+                id="delete-button",
+            ),
+            style={
+                    "display":"flex",
+                    "justifyContent":"center",
+                },
+        ),
+        html.Br(),
+        html.Br(),
+        dcc.Input(
+            id="search-box",
+            placeholder="植物名を入力",
+            value="",
         ),
         html.Div(id="delete-message"),
         dcc.Graph(id="temp-graph"),
@@ -198,8 +212,8 @@ def update_table(keyword, save_message, delete_message):
         rows, columns = plantsdb.get_data(keyword)
     else:
         rows, columns = plantsdb.get_data()
-    print(rows[-1])
-    print(len(rows))
+    #if not rows:
+    #    return [],[]
     df = pd.DataFrame(rows, columns=columns)
 
     if "id" in df.columns:
