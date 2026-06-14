@@ -40,7 +40,9 @@ app.layout = html.Div(
             [
                 dash_table.DataTable(
                     id="plants-table",
+                    hidden_columns=["id"],
                     page_size=20,
+                    row_selectable="single",
                 ),
             ],
             style={
@@ -48,6 +50,11 @@ app.layout = html.Div(
                 "maxWidth": "100%",
             },
         ),
+        html.Button(
+            "削除",
+            id="delete-button",
+        ),
+        html.Div(id="delete-message"),
         dcc.Graph(id="temp-graph"),
         dcc.Graph(id="gantt-graph"),
         html.H2("植物追加"),
@@ -76,6 +83,44 @@ app.layout = html.Div(
         "padding": "20px",
     },
 )
+
+
+# get table data
+@app.callback(
+    [Output(f"{field}-input", "value") for field, _, _ in FIELDS],
+    Input("plants-table", "selected_rows"),
+    State("plants-table", "data"),
+    prevent_initial_call=True,
+)
+def load_plant(selected_rows, data):
+
+    if not selected_rows:
+        return [None] * len(FIELDS)
+
+    row = data[selected_rows[0]]
+
+    return [row.get(field) for field, _, _ in FIELDS]
+
+
+# delete data
+@app.callback(
+    Output("delete-message", "children"),
+    Input("delete-button", "n_clicks"),
+    State("plants-table", "selected_rows"),
+    State("plants-table", "data"),
+    prevent_initial_call=True,
+)
+def delete_plant(n_clicks, selected_rows, data):
+
+    if not selected_rows:
+        return "行を選択してください"
+
+    row = data[selected_rows[0]]
+    name = row["name"]
+
+    plantsdb.delete_data(name)
+
+    return f"{name} を削除しました"
 
 
 # Input data
@@ -124,14 +169,16 @@ def update_gantt(keyword):
     return create_gantt_chart(rows)
 
 
+# table update
 @app.callback(
     Output("plants-table", "data"),
     Output("plants-table", "columns"),
     Input("search-box", "value"),
     Input("save-message", "children"),
+    Input("delete-message", "children"),
 )
-def update_table(keyword, message):
-    print("update_table called", message)
+def update_table(keyword, save_message, delete_message):
+    print("update_table called", save_message, delete_message)
     if keyword:
         rows, columns = plantsdb.get_data(keyword)
     else:
