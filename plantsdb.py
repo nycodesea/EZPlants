@@ -135,27 +135,6 @@ def get_data(keyword=None, table="plants_data", database=DB):
         return rows, columns
 
 
-def show_data(rows, columns, table="plants_data", database=DB):
-    if not rows:
-        print("No data found.")
-        return
-    # max width for each column
-    col_widths = [
-        max(len(str(row[i])) for row in rows + [columns]) for i in range(len(columns))
-    ]
-
-    # header
-    header = " | ".join(f"{col:<{width}}" for col, width in zip(columns, col_widths))
-    print(header)
-    print("-" * len(header))
-
-    # data rows
-    for row in rows:
-        print(
-            " | ".join(f"{str(item):<{width}}" for item, width in zip(row, col_widths))
-        )
-
-
 def search_data(keyword, table="plants_data", database=DB):
     with sqlite3.connect(database) as conn:
         cursor = conn.cursor()
@@ -167,9 +146,6 @@ def search_data(keyword, table="plants_data", database=DB):
             # part match
             (f"%{keyword}%",),
         )
-        result = response.fetchone()
-    print(result)
-
 
 def delete_data(item_name, table="plants_data", database=DB):
     with sqlite3.connect(database) as conn:
@@ -180,7 +156,6 @@ def delete_data(item_name, table="plants_data", database=DB):
             """,
             (item_name,),
         )
-    print("Deleted data successfully")
 
 
 def add_favorite(name):
@@ -218,7 +193,6 @@ def get_temp_rows(keyword=None, table="plants_data", database=DB):
             )
 
         rows = cursor.fetchall()
-        print(rows)
         return rows
 
 
@@ -227,7 +201,6 @@ def get_gantt_data(keyword, table="plants_data", database=DB):
         cursor = conn.cursor()
 
         if keyword is None:
-            print("NEED input NAME")
             return
         else:
             cursor.execute(
@@ -240,7 +213,6 @@ def get_gantt_data(keyword, table="plants_data", database=DB):
             )
 
         rows = cursor.fetchall()
-        print(rows)
         return rows
 
 

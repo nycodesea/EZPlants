@@ -194,7 +194,6 @@ def update_gantt(keyword):
         return {}
 
     rows = plantsdb.get_gantt_data(keyword)
-    print("called")
     return create_gantt_chart(rows)
 
 
@@ -207,7 +206,6 @@ def update_gantt(keyword):
     Input("delete-message", "children"),
 )
 def update_table(keyword, save_message, delete_message):
-    print("update_table called", save_message, delete_message)
     if keyword:
         rows, columns = plantsdb.get_data(keyword)
     else:
