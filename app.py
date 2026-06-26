@@ -9,17 +9,17 @@ TABLE = "plants_data"
 FAVTABLE = "plants_fav_data"
 # for input
 FIELDS = [
-    ("name", "植物名(※必須)", "text"),
-    ("scientific_name", "学名", "text"),
-    ("temp_max", "最高温度", "number"),
-    ("temp_min", "最低温度", "number"),
-    ("grow_pattern", "成長パターン", "text"),
-    ("water_amount", "水やり量", "text"),
-    ("fertilizer", "肥料", "text"),
-    ("sow_start", "種まき開始月", "number"),
-    ("sow_end", "種まき終了月", "number"),
-    ("harvest_start", "収穫開始月", "number"),
-    ("harvest_end", "収穫終了月", "number"),
+    ("name", "Plant name(required)", "text"),
+    ("scientific_name", "Scientific name", "text"),
+    ("temp_max", "Maximum temperature", "number"),
+    ("temp_min", "Minimum temperature", "number"),
+    ("grow_pattern", "Grow cycle", "text"),
+    ("water_amount", "Water requirements", "text"),
+    ("fertilizer", "Fertilizer", "text"),
+    ("sow_start", "Sowing start month", "number"),
+    ("sow_end", "Sowing end month", "number"),
+    ("harvest_start", "Harvest start month", "number"),
+    ("harvest_end", "Harvest end month", "number"),
 ]
 
 plantsdb.init_db()
@@ -29,7 +29,7 @@ app = Dash(__name__)
 app.layout = html.Div(
     [
         html.H1("EZPlants"),
-        html.H2("植物追加(同一名は更新)"),
+        html.H2("Add plant(using the same name updates the existing plant)"),
         html.Div(
             [
                 html.Div(
@@ -45,7 +45,7 @@ app.layout = html.Div(
         ),
         html.Div(
             html.Button(
-                "保存",
+                "Save",
                 id="save-button",
             ),
             style={
@@ -71,7 +71,7 @@ app.layout = html.Div(
         ),
         html.Div(
             html.Button(
-                "削除",
+                "Delete",
                 id="delete-button",
             ),
             style={
@@ -83,7 +83,7 @@ app.layout = html.Div(
         html.Br(),
         dcc.Input(
             id="search-box",
-            placeholder="植物名を入力",
+            placeholder="Enter plant name",
             value="",
         ),
         html.Div(id="delete-message"),
@@ -126,14 +126,14 @@ def load_plant(selected_rows, data):
 def delete_plant(n_clicks, selected_rows, data):
 
     if not selected_rows:
-        return "行を選択してください"
+        return "Please select a row"
 
     row = data[selected_rows[0]]
     name = row["name"]
 
     plantsdb.delete_data(name)
 
-    return f"{name} を削除しました"
+    return f"Deleted {name}"
 
 
 # Input data
@@ -149,10 +149,10 @@ def save_plant_callback(n_clicks, *values):
     plants_dict = {k: (None if v == "" else v) for k, v in plants_dict.items()}
     # Input check
     if not plants_dict["name"]:
-        return "植物名は必須です"
+        return "Plants name is required."
     if plants_dict["temp_min"] and plants_dict["temp_max"]:
         if plants_dict["temp_min"] > plants_dict["temp_max"]:
-            return "最低温度は最高温度以下にしてください"
+            return "Max temperature must be greater than minimum temperature."
 
     month_fields = [
         "sow_start",
@@ -164,11 +164,11 @@ def save_plant_callback(n_clicks, *values):
     for field in month_fields:
         value = plants_dict[field]
         if value is not None and not (1 <= value <= 12):
-            return f"{month_names[field]} は1～12で入力してください"
+            return f"{month_names[field]} must be between 1 and 12."
 
     plantsdb.save_plants(plants_dict)
 
-    return f'{plants_dict["name"]} を保存しました'
+    return f'{plants_dict["name"]} has been saved'
 
 
 # temp-graph
