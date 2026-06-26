@@ -49,8 +49,8 @@ app.layout = html.Div(
                 id="save-button",
             ),
             style={
-                "display":"flex",
-                "justifyContent":"center",
+                "display": "flex",
+                "justifyContent": "center",
             },
         ),
         html.Div(id="save-message"),
@@ -75,10 +75,11 @@ app.layout = html.Div(
                 id="delete-button",
             ),
             style={
-                    "display":"flex",
-                    "justifyContent":"center",
-                },
+                "display": "flex",
+                "justifyContent": "center",
+            },
         ),
+        html.Div(id="delete-message"),
         html.Br(),
         html.Br(),
         dcc.Input(
@@ -86,7 +87,6 @@ app.layout = html.Div(
             placeholder="Enter plant name",
             value="",
         ),
-        html.Div(id="delete-message"),
         dcc.Graph(id="temp-graph"),
         dcc.Graph(id="gantt-graph"),
     ],
@@ -212,7 +212,7 @@ def update_table(keyword, save_message, delete_message):
         rows, columns = plantsdb.get_data(keyword)
     else:
         rows, columns = plantsdb.get_data()
-    #if not rows:
+    # if not rows:
     #    return [],[]
     df = pd.DataFrame(rows, columns=columns)
 
