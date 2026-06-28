@@ -4,6 +4,8 @@ import plantsdb
 from graph import create_temp_range, create_gantt_chart
 from plantsdb import DB
 import graph
+from flask import request
+from plantsdb import add_watering_log
 
 TABLE = "plants_data"
 FAVTABLE = "plants_fav_data"
@@ -221,6 +223,25 @@ def update_table(keyword, save_message, delete_message):
         df.to_dict("records"),
         [{"name": c, "id": c} for c in df.columns],
     )
+
+
+server = app.server
+
+
+# watering api
+@server.route("/api/watering", methods=["POST"])
+def api_watering():
+    data = request.get_json()
+
+    add_watering_log(
+        data["plant_id"],
+        data["watering_time"],
+        data["watering_duration"],
+        data["moisture_before"],
+        data["moisture_after"],
+    )
+
+    return {"status": "ok"}
 
 
 if __name__ == "__main__":
