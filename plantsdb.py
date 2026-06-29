@@ -250,5 +250,24 @@ def add_watering_log(
         conn.commit()
 
 
+def watering_count():
+    with sqlite3.connect(DB) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT plant_id, COUNT(*) as count
+            FROM watering_logs
+            GROUP BY plant_id;
+        """)
+
+        return cursor.fetchall()
+
+
+def get_chart_data():
+    rows = watering_count()
+    plant_ids = [r[0] for r in rows]
+    counts = [r[1] for r in rows]
+    return plant_ids, counts
+
+
 if __name__ == "__main__":
     init_db()

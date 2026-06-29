@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
+from plantsdb import get_chart_data
 
 
 def show_temp_range(rows):
@@ -112,4 +113,11 @@ def create_gantt_chart(rows):
         bargap=0.5,
     )
 
+    return fig
+
+
+def create_watercount():
+    plant_ids, counts = get_chart_data()
+
+    fig = go.Figure(data=[go.Bar(x=plant_ids, y=counts)])
     return fig
