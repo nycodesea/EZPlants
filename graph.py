@@ -116,8 +116,22 @@ def create_gantt_chart(rows):
     return fig
 
 
-def create_watercount():
-    plant_ids, counts = get_chart_data()
+def create_watering_graph():
+    plant_ids, watering_times, watering_durations, moisture_before, moisture_after = (
+        get_chart_data()
+    )
+    fig = go.Figure()
 
-    fig = go.Figure(data=[go.Bar(x=plant_ids, y=counts)])
+    fig.add_trace(
+        go.Bar(
+            x=watering_times,
+            y=watering_durations,
+            name="Watering Duration",
+        )
+    )
+    fig.update_layout(
+        title="Watering Logs",
+        xaxis_title="Date and Time",
+        yaxis_title="Duration (milliseconds)",
+    )
     return fig

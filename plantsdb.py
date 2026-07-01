@@ -262,12 +262,51 @@ def watering_count():
         return cursor.fetchall()
 
 
+def get_watering_logs(plant_id=None):
+    with sqlite3.connect(DB) as conn:
+        cursor = conn.cursor()
+        if plant_id is None:
+            cursor.execute("""
+                SELECT * FROM watering_logs
+                ORDER BY watering_time DESC
+            """)
+        else:
+            cursor.execute(
+                """
+                SELECT * FROM watering_logs
+                WHERE plant_id = ?
+                ORDER BY watering_time DESC
+            """,
+                (plant_id,),
+            )
+
+        return cursor.fetchall()
+
+
 def get_chart_data():
-    rows = watering_count()
-    plant_ids = [r[0] for r in rows]
-    counts = [r[1] for r in rows]
-    return plant_ids, counts
+    rows = get_watering_logs()
+
+    plant_ids = [r[1] for r in rows]
+    watering_times = [r[2] for r in rows]
+    watering_durations = [r[3] for r in rows]
+    moisture_before = [r[4] for r in rows]
+    moisture_after = [r[5] for r in rows]
+    return (
+        plant_ids,
+        watering_times,
+        watering_durations,
+        moisture_before,
+        moisture_after,
+    )
 
 
 if __name__ == "__main__":
     init_db()
+    get_chart_data()
+    # add_watering_log(
+    #     plant_id=1,
+    #     watering_time="2026-7-01 08:00:00",
+    #     watering_duration=30,
+    #     moisture_before=3000,
+    #     moisture_after=2000,
+    # )

@@ -1,7 +1,7 @@
 from dash import Dash, html, dcc, dash_table, Input, Output, State
 import pandas as pd
 import plantsdb
-from graph import create_temp_range, create_gantt_chart, create_watercount
+from graph import create_temp_range, create_gantt_chart, create_watering_graph
 from plantsdb import DB
 from flask import request
 from plantsdb import add_watering_log
@@ -90,7 +90,9 @@ app.layout = html.Div(
         ),
         dcc.Graph(id="temp-graph"),
         dcc.Graph(id="gantt-graph"),
-        html.Div([html.H2("Watering Count"), dcc.Graph(figure=create_watercount())]),
+        html.Div(
+            [html.H2("Watering Count"), dcc.Graph(figure=create_watering_graph())]
+        ),
     ],
     style={
         "backgroundColor": "#FDF3DDFF",
